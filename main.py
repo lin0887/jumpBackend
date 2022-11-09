@@ -15,7 +15,7 @@ from fastapi.middleware.cors import CORSMiddleware
 # openssl rand -hex 32
 SECRET_KEY = "5548a81bf036952bf5e88b0e8f9e9617f6e019bba806484cfa77a911bdee4206"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+ACCESS_TOKEN_EXPIRE_MINUTES = 60*5
 SALT = "10dd0cd14462a4dda5a6a3ec4b71f2e0"
 
 app = FastAPI()
@@ -45,6 +45,8 @@ class User(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str
+
+
 
 
 def unauthorized(detail: str) -> HTTPException:
@@ -136,7 +138,7 @@ async def uploadCSV(current_user: User = Depends(dep_user),file: Union[UploadFil
     return status.HTTP_401_UNAUTHORIZED
     
 @app.post("/uploadVideo/{id}")
-async def uploadFile(current_user: User = Depends(dep_user),id: str = None,file: Union[UploadFile, None] = None):
+async def uploadFile(current_user: User = Depends(dep_user),id: str = None,file: UploadFile = None):
     if current_user:
         if not file:
             return {"message": "No upload file sent"}
