@@ -1,6 +1,6 @@
 import os
 from typing import Union
-from fastapi import FastAPI, UploadFile
+from fastapi import FastAPI, Response, UploadFile
 import pandas as pd
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
@@ -70,7 +70,8 @@ async def uploadFile(id: str = None, file: UploadFile = None):
 @app.get("/contestants")
 async def rankBoard():
     data = open("contestants.json", "r")
-    return data.read()
+    return Response(content=data.read(), media_type="application/json")
+    
 
 @app.post("/contestants")
 async def contestants(register: Register = None):  # type: ignore
