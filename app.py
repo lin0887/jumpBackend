@@ -89,7 +89,8 @@ async def contestants(register: Register = None):  # type: ignore
 async def getContestant(contestant_id: str = None):
     data = pd.read_json("./contestants.json")
     contestant = data[data["id"] == contestant_id]
+    print(contestant)
     return contestant.to_json(orient="records")
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run('main:app', host="0.0.0.0", port=8000 ,reload=True)
