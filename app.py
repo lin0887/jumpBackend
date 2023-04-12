@@ -59,6 +59,7 @@ async def uploadCSV(file: Union[UploadFile, None] = None):
 
 @app.post("/uploadVideo/{id}")
 async def uploadFile(id: str = None, file: UploadFile = None):
+    print(id)
     if not file:
         return {"message": "No upload file sent"}
     else:
@@ -89,8 +90,7 @@ async def contestants(register: Register = None):  # type: ignore
 async def getContestant(contestant_id: str = None):
     data = pd.read_json("./contestants.json")
     contestant = data[data["id"] == contestant_id]
-    print(contestant)
-    return contestant.to_json(orient="records")
+    return Response(content=contestant.to_json(orient="records"), media_type="application/json")
 
 if __name__ == "__main__":
-    uvicorn.run('main:app', host="0.0.0.0", port=8000 ,reload=True)
+    uvicorn.run('app:app', host="0.0.0.0", port=8000 ,reload=True)
