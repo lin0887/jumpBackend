@@ -1,11 +1,22 @@
 import os
 from typing import Union
-from fastapi import FastAPI, Response, UploadFile
+from fastapi import FastAPI, UploadFile
 import pandas as pd
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
 from pydantic import BaseModel
+
+input_path = '..\\input\\'
+output_path = '..\\output\\'
+
+if os.path.isdir(input_path) != True:
+    os.system("mkdir {}".format(input_path))
+    print("create folder: {}".format(input_path))
+
+if os.path.isdir(output_path) != True:
+    os.system("mkdir {}".format(output_path))
+    print("create folder: {}".format(output_path))
 
 class Contestant(BaseModel):
     id: str
@@ -59,11 +70,10 @@ async def uploadCSV(file: Union[UploadFile, None] = None):
 
 @app.post("/uploadVideo/{id}")
 async def uploadFile(id: str = None, file: UploadFile = None):
-    print(id)
     if not file:
         return {"message": "No upload file sent"}
     else:
-        filename = id + '.' + file.filename.split(".")[-1]
+        filename = '..//input//'+id + '.' + file.filename.split(".")[-1]
         with open(filename, "wb") as buffer:
             buffer.write(file.file.read())
         return {"message": "File uploaded successfully"}
@@ -71,8 +81,7 @@ async def uploadFile(id: str = None, file: UploadFile = None):
 @app.get("/contestants")
 async def rankBoard():
     data = open("contestants.json", "r")
-    return Response(content=data.read(), media_type="application/json")
-    
+    return data.read()
 
 @app.post("/contestants")
 async def contestants(register: Register = None):  # type: ignore
@@ -90,7 +99,8 @@ async def contestants(register: Register = None):  # type: ignore
 async def getContestant(contestant_id: str = None):
     data = pd.read_json("./contestants.json")
     contestant = data[data["id"] == contestant_id]
-    return Response(content=contestant.to_json(orient="records"), media_type="application/json")
+    print(contestant)
+    return contestant.to_json(orient="records")
 
 if __name__ == "__main__":
-    uvicorn.run('app:app', host="0.0.0.0", port=8000 ,reload=True)
+    uvicorn.run(app, host="0.0.0.0", port=8000)
