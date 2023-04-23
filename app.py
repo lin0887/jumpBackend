@@ -1,6 +1,6 @@
 import os
 from typing import Union
-from fastapi import FastAPI, UploadFile
+from fastapi import FastAPI, Response, UploadFile
 import pandas as pd
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
@@ -70,6 +70,7 @@ async def uploadCSV(file: Union[UploadFile, None] = None):
 
 @app.post("/uploadVideo/{id}")
 async def uploadFile(id: str = None, file: UploadFile = None):
+    print(id)
     if not file:
         return {"message": "No upload file sent"}
     else:
@@ -81,7 +82,8 @@ async def uploadFile(id: str = None, file: UploadFile = None):
 @app.get("/contestants")
 async def rankBoard():
     data = open("contestants.json", "r")
-    return data.read()
+    return Response(content=data.read(), media_type="application/json")
+    
 
 @app.post("/contestants")
 async def contestants(register: Register = None):  # type: ignore
@@ -96,11 +98,13 @@ async def contestants(register: Register = None):  # type: ignore
     return {"message": "Contestant added successfully"}
 
 @app.get("/contestants/{contestant_id}")
-async def getContestant(contestant_id: str = None):
+async def getContestant(contestant_id: Union[str, int] = None):
     data = pd.read_json("./contestants.json")
+    if pd.api.types.is_integer_dtype(data["id"]):
+        contestant_id = int(contestant_id)
     contestant = data[data["id"] == contestant_id]
-    print(contestant)
-    return contestant.to_json(orient="records")
+    return Response(content=contestant.to_json(orient="records"), media_type="application/json")
+
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run('app:app', host="0.0.0.0", port=8000 ,reload=True)
